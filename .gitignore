@@ -27,6 +27,7 @@ hs_err_pid*
 .settings
 
 # Ignore Gradle build output directory
+bin
 build
 
 # VS code
