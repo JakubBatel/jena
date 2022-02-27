@@ -3,10 +3,12 @@ package cz.muni.fi.jana;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
@@ -14,7 +16,6 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import com.github.javaparser.symbolsolver.utils.SymbolSolverCollectionStrategy;
 import com.github.javaparser.utils.ProjectRoot;
 import com.github.javaparser.utils.SourceRoot;
-
 import cz.muni.fi.jana.analyzer.Analyzer;
 
 public class CodeAnalyzisRunner {
@@ -41,15 +42,24 @@ public class CodeAnalyzisRunner {
                 // CompilationUnit == ExampleFile.java
                 List<ParseResult<CompilationUnit>> parseResults = sr.tryToParse();
                 for (ParseResult<CompilationUnit> parseResult : parseResults) {
+                    if (!parseResult.isSuccessful()) {
+                        continue;
+                    }
                     CompilationUnit compilationUnit = parseResult.getResult().get();
 
-                    final String packageName =
-                            compilationUnit.getPackageDeclaration().get().getNameAsString();
-                    final String className = compilationUnit.getPrimaryTypeName().get();
-                    final String fullName = packageName + "." + className;
+                    final Optional<PackageDeclaration> packageDeclaration =
+                            compilationUnit.getPackageDeclaration();
 
-                    if (excluded.contains(fullName)) {
-                        continue;
+                    if (!packageDeclaration.isPresent()) {
+                        System.out.println("Warn - no package");
+                    } else {
+                        final String packageName = packageDeclaration.get().getNameAsString();
+                        final String className = compilationUnit.getPrimaryTypeName().get();
+                        final String fullName = packageName + "." + className;
+
+                        if (excluded.contains(fullName)) {
+                            continue;
+                        }
                     }
 
                     analyzer.analyze(compilationUnit);

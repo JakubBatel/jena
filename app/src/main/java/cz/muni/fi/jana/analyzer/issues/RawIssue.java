@@ -2,6 +2,7 @@ package cz.muni.fi.jana.analyzer.issues;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.github.javaparser.ast.Node;
 
@@ -15,7 +16,7 @@ public class RawIssue {
         if (nodes.isEmpty()) {
             throw new IllegalArgumentException("Nodes can not be empty.");
         }
-        nodes = new ArrayList<>(nodes);
+        this.nodes = new ArrayList<>(nodes);
     }
 
     public int getFirstLineNumber() {
@@ -29,6 +30,10 @@ public class RawIssue {
             stringBuilder.append(node.toString());
         }
         return stringBuilder.toString();
+    }
+    
+    public List<Node> getRawContext() {
+        return Collections.unmodifiableList(nodes);
     }
 
     private List<Node> nodes;

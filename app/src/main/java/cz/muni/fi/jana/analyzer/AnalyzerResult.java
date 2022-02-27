@@ -3,12 +3,21 @@ package cz.muni.fi.jana.analyzer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.json.JSONObject;
 import cz.muni.fi.jana.analyzer.issues.Issue;
 
 public class AnalyzerResult {
     @Override
     public String toString() {
-        return issues.toString();
+        return toJSON().toString(2);
+    }
+
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        issues.forEach((issue) -> {
+            json.append("issues", issue.toJSON());
+        });
+        return json;
     }
 
     public List<Issue> getIssues() {

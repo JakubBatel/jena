@@ -13,12 +13,7 @@ public class Issue {
 
     @Override
     public String toString() {
-        JSONObject object = new JSONObject();
-        object.put("name", name);
-        object.put("class", fullyQualifiedName);
-        object.put("line", lineNumber);
-        object.put("context", context);
-        return object.toString();
+        return toJSON().toString(2);
     }
 
     public String getName() {
@@ -35,6 +30,15 @@ public class Issue {
 
     public String getContext() {
         return context;
+    }
+
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("name", name);
+        json.put("class", fullyQualifiedName);
+        json.put("line", lineNumber);
+        json.put("context", context);
+        return json;
     }
 
     private final String name;
