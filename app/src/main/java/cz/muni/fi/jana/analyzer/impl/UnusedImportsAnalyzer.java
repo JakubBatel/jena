@@ -20,9 +20,7 @@ public class UnusedImportsAnalyzer extends Analyzer {
 
     @Override
     public void analyze(CompilationUnit compilationUnit) {
-        final String packageName = compilationUnit.getPackageDeclaration().get().getNameAsString();
-        final String className = compilationUnit.getPrimaryTypeName().get();
-        final String fullyQualifiedName = packageName + "." + className;
+        final String fullyQualifiedName = Analyzer.getFullyQualifiedName(compilationUnit);
 
         final List<ImportDeclaration> imports = compilationUnit.findAll(ImportDeclaration.class);
 
