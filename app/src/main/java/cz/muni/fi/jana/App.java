@@ -28,10 +28,13 @@ public class App {
                     (exclude != null) ? new HashSet<>(exclude) : new HashSet<>();
             final Path projectRootPath =
                     FileSystems.getDefault().getPath(argNamespace.getString("root"));
-            final Analyzer analyzer = CombinedAnalyzer.of(new AutowiredAnalyzer(), new OneToManyOneSidedAnalyzer(),
-                    new CommentedOutCodeAnalyzer(), new TODOCommentAnalyzer(),
-                    new FIXMECommentAnalyzer(), new OldDateTimeAPIAnalyzer(),
-                    new UnusedImportsAnalyzer());
+            final Analyzer analyzer = CombinedAnalyzer.of(new AutowiredAnalyzer(),
+                    new OneToManyOneSidedAnalyzer(), new CommentedOutCodeAnalyzer(),
+                    new TODOCommentAnalyzer(), new FIXMECommentAnalyzer(),
+                    new OldDateTimeAPIAnalyzer(), new UnusedImportsAnalyzer(),
+                    new UnusedVariablesAnalyzer(), new UnusedAttributesAnalyzer(),
+                    new ServiceSizeAnalyzer(4, 16), new RESTRequestMethodAnalyzer(),
+                    new ConcreteClassInjectionAnalyzer(), new UselessInjectionAnalyzer());
 
             CodeAnalyzisRunner runner =
                     new CodeAnalyzisRunner(projectRootPath, excludeSet, analyzer);
@@ -39,7 +42,5 @@ public class App {
         } catch (ArgumentParserException e) {
             argumentParser.handleError(e);
         }
-
-        // TODO do this
     }
 }
