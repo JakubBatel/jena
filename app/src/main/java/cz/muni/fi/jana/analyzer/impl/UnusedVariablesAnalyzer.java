@@ -9,10 +9,18 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import cz.muni.fi.jana.analyzer.Analyzer;
-import cz.muni.fi.jana.analyzer.issues.IssuesCodes;
+import cz.muni.fi.jana.analyzer.issues.IssueCode;
 import cz.muni.fi.jana.analyzer.issues.RawIssue;
 
 public class UnusedVariablesAnalyzer extends Analyzer {
+
+    public UnusedVariablesAnalyzer() {
+        super();
+    }
+
+    public UnusedVariablesAnalyzer(boolean includeContext) {
+        super(includeContext);
+    }
 
     @Override
     public void analyze(CompilationUnit compilationUnit) {
@@ -28,7 +36,7 @@ public class UnusedVariablesAnalyzer extends Analyzer {
                     .map(NameExpr::getNameAsString).collect(Collectors.toSet());
 
             if (!usedNames.containsAll(variablesNames)) {
-                addIssue(fullyQualifiedName, IssuesCodes.UNUSED_VARIABLE, new RawIssue(varDec));
+                addIssue(fullyQualifiedName, IssueCode.UNUSED_VARIABLE, new RawIssue(varDec));
             }
         });
     }

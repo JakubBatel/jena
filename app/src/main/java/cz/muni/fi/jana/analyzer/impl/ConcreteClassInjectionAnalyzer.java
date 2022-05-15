@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.github.javaparser.ast.CompilationUnit;
@@ -14,9 +15,18 @@ import org.apache.commons.lang3.tuple.Pair;
 import cz.muni.fi.jana.analyzer.Analyzer;
 import cz.muni.fi.jana.analyzer.AnalyzerResult;
 import cz.muni.fi.jana.analyzer.issues.Issue;
-import cz.muni.fi.jana.analyzer.issues.IssuesCodes;
+import cz.muni.fi.jana.analyzer.issues.IssueCode;
+import cz.muni.fi.jana.analyzer.util.Predicates;
 
 public class ConcreteClassInjectionAnalyzer extends Analyzer {
+
+    public ConcreteClassInjectionAnalyzer() {
+        super();
+    }
+
+    public ConcreteClassInjectionAnalyzer(boolean includeContext) {
+        super(includeContext);
+    }
 
     @Override
     public void analyze(CompilationUnit compilationUnit) {
@@ -38,8 +48,13 @@ public class ConcreteClassInjectionAnalyzer extends Analyzer {
                 }
                 final FieldDeclaration field = pair.getRight();
                 final int lineNumber = field.getBegin().get().line;
-                result.add(new Issue(IssuesCodes.CONCRETE_CLASS_INJECTION, lineNumber,
-                        fullyQualifiedName, field.toString()));
+                if (getIncludeContext()) {
+                    result.add(new Issue(IssueCode.CONCRETE_CLASS_INJECTION, lineNumber,
+                            fullyQualifiedName, field.toString()));
+                } else {
+                    result.add(new Issue(IssueCode.CONCRETE_CLASS_INJECTION, lineNumber,
+                            fullyQualifiedName));
+                }
             }
         }
         return result;
@@ -47,11 +62,8 @@ public class ConcreteClassInjectionAnalyzer extends Analyzer {
 
     private List<Pair<String, FieldDeclaration>> getInjectedFields(
             CompilationUnit compilationUnit) {
-        return compilationUnit
-                .findAll(FieldDeclaration.class,
-                        (field) -> field.getAnnotationByName("Inject").isPresent()
-                                || field.getAnnotationByName("Autowired").isPresent())
-                .stream().map((field) -> {
+        return compilationUnit.findAll(FieldDeclaration.class, Predicates::isInjectedField).stream()
+                .map((field) -> {
                     try {
                         return Pair.of(
                                 field.resolve().getType().asReferenceType().getQualifiedName(),
@@ -59,21 +71,19 @@ public class ConcreteClassInjectionAnalyzer extends Analyzer {
                     } catch (UnsolvedSymbolException ex) {
                         return null;
                     }
-                }).filter((resolvedField) -> resolvedField != null).collect(Collectors.toList());
+                }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private Set<String> getInterfaces(CompilationUnit compilationUnit) {
         return compilationUnit
-                .findAll(ClassOrInterfaceDeclaration.class,
-                        (classOrInterface) -> classOrInterface.isInterface())
+                .findAll(ClassOrInterfaceDeclaration.class, Predicates::isInterfaceDeclaration)
                 .stream().map((interfaceDeclaration) -> {
                     try {
                         return interfaceDeclaration.resolve().getQualifiedName();
                     } catch (UnsolvedSymbolException ex) {
                         return null;
                     }
-                }).filter((interfaceDeclaration) -> interfaceDeclaration != null)
-                .collect(Collectors.toSet());
+                }).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     private Map<String, List<Pair<String, FieldDeclaration>>> injectedFields = new HashMap<>();

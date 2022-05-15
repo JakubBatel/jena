@@ -21,9 +21,17 @@ import org.apache.commons.lang3.tuple.Triple;
 import cz.muni.fi.jana.analyzer.Analyzer;
 import cz.muni.fi.jana.analyzer.AnalyzerResult;
 import cz.muni.fi.jana.analyzer.issues.Issue;
-import cz.muni.fi.jana.analyzer.issues.IssuesCodes;
+import cz.muni.fi.jana.analyzer.issues.IssueCode;
 
 public class OneToManyOneSidedAnalyzer extends Analyzer {
+
+    public OneToManyOneSidedAnalyzer() {
+        super();
+    }
+
+    public OneToManyOneSidedAnalyzer(boolean includeContext) {
+        super(includeContext);
+    }
 
     @Override
     public void analyze(CompilationUnit compilationUnit) {
@@ -53,23 +61,38 @@ public class OneToManyOneSidedAnalyzer extends Analyzer {
             final FieldDeclaration manyDeclaration = value.getRight();
             if (oneDeclaration == null) {
                 final var position = manyDeclaration.getBegin();
-                result.add(new Issue(IssuesCodes.ONE_SIDED_ONE_TO_MANY,
-                        (position.isPresent()) ? position.get().line : null, key.getRight(),
-                        manyDeclaration.toString()));
+                if (getIncludeContext()) {
+                    result.add(new Issue(IssueCode.ONE_SIDED_ONE_TO_MANY,
+                            (position.isPresent()) ? position.get().line : null, key.getRight(),
+                            manyDeclaration.toString()));
+                } else {
+                    result.add(new Issue(IssueCode.ONE_SIDED_ONE_TO_MANY,
+                            (position.isPresent()) ? position.get().line : null, key.getRight()));
+                }
             }
             if (manyDeclaration == null) {
                 final var position = oneDeclaration.getBegin();
-                result.add(new Issue(IssuesCodes.ONE_SIDED_ONE_TO_MANY,
-                        (position.isPresent()) ? position.get().line : null, key.getLeft(),
-                        oneDeclaration.toString()));
+                if (getIncludeContext()) {
+                    result.add(new Issue(IssueCode.ONE_SIDED_ONE_TO_MANY,
+                            (position.isPresent()) ? position.get().line : null, key.getLeft(),
+                            oneDeclaration.toString()));
+                } else {
+                    result.add(new Issue(IssueCode.ONE_SIDED_ONE_TO_MANY,
+                            (position.isPresent()) ? position.get().line : null, key.getLeft()));
+                }
             }
         }
         for (final var pair : missingMappedByAttributeDeclarations) {
             final FieldDeclaration declaration = pair.getRight();
             final var position = declaration.getBegin();
-            result.add(new Issue(IssuesCodes.MISSING_MAPPED_BY,
-                    (position.isPresent()) ? position.get().line : null, pair.getLeft(),
-                    declaration.toString()));
+            if (getIncludeContext()) {
+                result.add(new Issue(IssueCode.MISSING_MAPPED_BY,
+                        (position.isPresent()) ? position.get().line : null, pair.getLeft(),
+                        declaration.toString()));
+            } else {
+                result.add(new Issue(IssueCode.MISSING_MAPPED_BY,
+                        (position.isPresent()) ? position.get().line : null, pair.getLeft()));
+            }
         }
         return result;
     }
@@ -132,7 +155,7 @@ public class OneToManyOneSidedAnalyzer extends Analyzer {
             final String mappedBy = mappedByOptional.get();
             final String manyQualifiedName = resolvedType.getQualifiedName();
 
-            // Add field declaration to map which is used for obtaining results of analyzis
+            // Add field declaration to map which is used for obtaining results of analysis
             final Triple<String, String, String> declarationsKey =
                     Triple.of(oneQualifiedName, mappedBy, manyQualifiedName);
             final Pair<FieldDeclaration, FieldDeclaration> declarationsPair =
@@ -151,7 +174,7 @@ public class OneToManyOneSidedAnalyzer extends Analyzer {
             final String mappedBy = fd.getVariable(0).getNameAsString();
             final String oneQualifiedName = resolvedType.getQualifiedName();
 
-            // Add field declaration to map which is used for obtaining results of analyzis
+            // Add field declaration to map which is used for obtaining results of analysis
             final Triple<String, String, String> declarationsKey =
                     Triple.of(oneQualifiedName, mappedBy, manyQualifiedName);
             final Pair<FieldDeclaration, FieldDeclaration> declarationsPair =

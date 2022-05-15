@@ -9,8 +9,17 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 
+/**
+ * Detects whether a Lombok library was used in the given compilation unit.
+ */
 public class LombokDetector {
 
+    /**
+     * Verifies if the given class/interface uses Lombok library (has @Data or @Value annotation).
+     * @param compilationUnit Compilation unit that contains the declaration of the class/interface.
+     * @param classOrInterfaceDeclaration Class/Interface declaration that will be analyzed.
+     * @return True if the class uses Lombok, false otherwise.
+     */
     public static boolean usesLombok(CompilationUnit compilationUnit,
             ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
         final Set<String> lombokImports = getLombokImports(compilationUnit);
@@ -21,6 +30,12 @@ public class LombokDetector {
                 || containsAnnotation("Value", classOrInterfaceDeclaration, lombokImports);
     }
 
+    /**
+     * Verifies if the given field uses Lombok library (has @Getter annotation).
+     * @param compilationUnit Compilation unit that contains the declaration of the field declaration.
+     * @param fieldDeclaration Field declaration that will be analyzed.
+     * @return True if the field uses Lombok, false otherwise.
+     */
     public static boolean usesLombok(CompilationUnit compilationUnit,
             FieldDeclaration fieldDeclaration) {
         final Set<String> lombokImports = getLombokImports(compilationUnit);

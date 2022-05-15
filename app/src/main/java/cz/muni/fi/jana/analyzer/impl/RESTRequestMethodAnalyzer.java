@@ -6,10 +6,18 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import cz.muni.fi.jana.analyzer.Analyzer;
-import cz.muni.fi.jana.analyzer.issues.IssuesCodes;
+import cz.muni.fi.jana.analyzer.issues.IssueCode;
 import cz.muni.fi.jana.analyzer.issues.RawIssue;
 
 public class RESTRequestMethodAnalyzer extends Analyzer {
+
+    public RESTRequestMethodAnalyzer() {
+        super();
+    }
+
+    public RESTRequestMethodAnalyzer(boolean includeContext) {
+        super(includeContext);
+    }
 
     @Override
     public void analyze(CompilationUnit compilationUnit) {
@@ -41,7 +49,7 @@ public class RESTRequestMethodAnalyzer extends Analyzer {
 
                     if (methodActionType != CRUDActionType.UNKNOWN
                             && methodActionType != requestMethodActionType) {
-                        addIssue(fullyQualifiedName, IssuesCodes.INCORRECT_REQUEST_METHOD,
+                        addIssue(fullyQualifiedName, IssueCode.INCORRECT_REQUEST_METHOD,
                                 new RawIssue(method));
                     }
                 });

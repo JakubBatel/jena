@@ -8,10 +8,18 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.comments.Comment;
 import cz.muni.fi.jana.analyzer.Analyzer;
-import cz.muni.fi.jana.analyzer.issues.IssuesCodes;
+import cz.muni.fi.jana.analyzer.issues.IssueCode;
 import cz.muni.fi.jana.analyzer.issues.RawIssue;
 
 public class CommentedOutCodeAnalyzer extends Analyzer {
+
+    public CommentedOutCodeAnalyzer() {
+        super();
+    }
+
+    public CommentedOutCodeAnalyzer(boolean includeContext) {
+        super(includeContext);
+    }
 
     @Override
     public void analyze(CompilationUnit compilationUnit) {
@@ -29,9 +37,7 @@ public class CommentedOutCodeAnalyzer extends Analyzer {
     private static final List<Function<String, Object>> parserFunctions = List.of(
             StaticJavaParser::parseAnnotation, StaticJavaParser::parseAnnotationBodyDeclaration,
             StaticJavaParser::parseBlock, StaticJavaParser::parseBodyDeclaration,
-            StaticJavaParser::parseExplicitConstructorInvocationStmt,
-            StaticJavaParser::parseExpression, StaticJavaParser::parseImport,
-            StaticJavaParser::parseModuleDeclaration, StaticJavaParser::parseModuleDirective,
+            StaticJavaParser::parseExplicitConstructorInvocationStmt, StaticJavaParser::parseImport,
             StaticJavaParser::parsePackageDeclaration, StaticJavaParser::parseStatement,
             StaticJavaParser::parseTypeDeclaration, StaticJavaParser::parseTypeParameter,
             StaticJavaParser::parseVariableDeclarationExpr);
@@ -95,7 +101,7 @@ public class CommentedOutCodeAnalyzer extends Analyzer {
                     final List<Comment> subGroup = group.subList(beginning, end);
                     result = analyzeGroup(subGroup);
                     if (result) {
-                        addIssue(fullyQualifiedName, IssuesCodes.COMMENTED_OUT_CODE,
+                        addIssue(fullyQualifiedName, IssueCode.COMMENTED_OUT_CODE,
                                 new RawIssue(subGroup));
                         break;
                     }

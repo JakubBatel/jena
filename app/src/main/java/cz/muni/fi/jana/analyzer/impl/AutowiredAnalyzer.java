@@ -5,10 +5,18 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import cz.muni.fi.jana.analyzer.Analyzer;
-import cz.muni.fi.jana.analyzer.issues.IssuesCodes;
+import cz.muni.fi.jana.analyzer.issues.IssueCode;
 import cz.muni.fi.jana.analyzer.issues.RawIssue;
 
 public class AutowiredAnalyzer extends Analyzer {
+
+    public AutowiredAnalyzer() {
+        super();
+    }
+
+    public AutowiredAnalyzer(boolean includeContext) {
+        super(includeContext);
+    }
 
     @Override
     public void analyze(CompilationUnit compilationUnit) {
@@ -17,8 +25,8 @@ public class AutowiredAnalyzer extends Analyzer {
         compilationUnit.findAll(FieldDeclaration.class).forEach((fieldDeclaration) -> {
             Optional<AnnotationExpr> autowiredAnnotationOptional =
                     fieldDeclaration.getAnnotationByName("Autowired");
-            if (!autowiredAnnotationOptional.isEmpty()) {
-                addIssue(fullyQualifiedName, IssuesCodes.AUTOWIRED, new RawIssue(fieldDeclaration));
+            if (autowiredAnnotationOptional.isPresent()) {
+                addIssue(fullyQualifiedName, IssueCode.AUTOWIRED, new RawIssue(fieldDeclaration));
             }
         });
     }

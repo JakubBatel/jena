@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.github.javaparser.ast.CompilationUnit;
 import cz.muni.fi.jana.analyzer.Analyzer;
 import cz.muni.fi.jana.analyzer.AnalyzerResult;
+import cz.muni.fi.jana.analyzer.impl.*;
 
 public class CombinedAnalyzer extends Analyzer {
 
@@ -18,6 +19,45 @@ public class CombinedAnalyzer extends Analyzer {
 
     public static CombinedAnalyzer of(Collection<Analyzer> analyzers) {
         return new CombinedAnalyzer(analyzers);
+    }
+
+    public static CombinedAnalyzer g(boolean includeContext) {
+        return CombinedAnalyzer.of(
+                new OldDateTimeAPIAnalyzer(includeContext),
+                new UnusedImportsAnalyzer(includeContext),
+                new UnusedVariablesAnalyzer(includeContext),
+                new UnusedAttributesAnalyzer(includeContext),
+                new CommentedOutCodeAnalyzer(includeContext),
+                new FIXMECommentAnalyzer(includeContext),
+                new TODOCommentAnalyzer(includeContext)
+        );
+    }
+
+    public static CombinedAnalyzer p(boolean includeContext) {
+        return CombinedAnalyzer.of(
+                new OneToManyOneSidedAnalyzer(includeContext)
+        );
+    }
+
+    public static CombinedAnalyzer s(boolean includeContext) {
+        return CombinedAnalyzer.of(
+                new ServiceSizeAnalyzer(includeContext)
+        );
+    }
+
+    public static CombinedAnalyzer d(boolean includeContext) {
+        return CombinedAnalyzer.of(
+                new AutowiredAnalyzer(includeContext),
+                new ConcreteClassInjectionAnalyzer(includeContext),
+                new UselessInjectionAnalyzer(includeContext),
+                new FatDIClassAnalyzer(includeContext)
+        );
+    }
+
+    public static CombinedAnalyzer r(boolean includeContext) {
+        return CombinedAnalyzer.of(
+                new RESTRequestMethodAnalyzer(includeContext)
+        );
     }
 
     @Override

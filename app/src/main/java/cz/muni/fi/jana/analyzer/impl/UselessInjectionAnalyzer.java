@@ -3,27 +3,35 @@ package cz.muni.fi.jana.analyzer.impl;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import org.apache.commons.lang3.tuple.Pair;
-import cz.muni.fi.jana.analyzer.issues.IssuesCodes;
+import cz.muni.fi.jana.analyzer.issues.IssueCode;
+import cz.muni.fi.jana.analyzer.util.Predicates;
 
 public class UselessInjectionAnalyzer extends UnusedAttributesAnalyzer {
+
+    public UselessInjectionAnalyzer() {
+        super();
+    }
+
+    public UselessInjectionAnalyzer(boolean includeContext) {
+        super(includeContext);
+    }
 
     @Override
     public void analyze(CompilationUnit compilationUnit) {
         super.analyze(compilationUnit);
-        filterIssues((issueName, issue) -> {
-            if (!IssuesCodes.UNUSED_ATTRIBUTE.equals(issueName)) {
+        filterIssues((code, issue) -> {
+            if (code != IssueCode.UNUSED_ATTRIBUTE) {
                 return false;
             }
             final FieldDeclaration fieldDeclaration =
                     (FieldDeclaration) issue.getRawContext().get(0);
-            return fieldDeclaration.getAnnotationByName("Inject").isPresent()
-                    || fieldDeclaration.getAnnotationByName("Autowired").isPresent();
+            return Predicates.isInjectedField(fieldDeclaration);
         });
         mapIssues((pair) -> {
-            if (!IssuesCodes.UNUSED_ATTRIBUTE.equals(pair.getKey())) {
+            if (pair.getKey() != IssueCode.UNUSED_ATTRIBUTE) {
                 return pair;
             }
-            return Pair.of(IssuesCodes.USELESS_INJECTION, pair.getValue());
+            return Pair.of(IssueCode.USELESS_INJECTION, pair.getValue());
         });
     }
 

@@ -13,27 +13,35 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
 import cz.muni.fi.jana.analyzer.Analyzer;
-import cz.muni.fi.jana.analyzer.issues.IssuesCodes;
+import cz.muni.fi.jana.analyzer.issues.IssueCode;
 import cz.muni.fi.jana.analyzer.issues.RawIssue;
 import cz.muni.fi.jana.analyzer.util.LombokDetector;
+import cz.muni.fi.jana.analyzer.util.Predicates;
 
 public class UnusedAttributesAnalyzer extends Analyzer {
 
+    public UnusedAttributesAnalyzer() {
+        super();
+    }
+
+    public UnusedAttributesAnalyzer(boolean includeContext) {
+        super(includeContext);
+    }
+    
     @Override
     public void analyze(CompilationUnit compilationUnit) {
-        final List<ClassOrInterfaceDeclaration> classes =
-                compilationUnit.findAll(ClassOrInterfaceDeclaration.class);
-        for (final var classOrInterfaceDec : classes) {
-            if (classOrInterfaceDec.isInterface()
-                    || LombokDetector.usesLombok(compilationUnit, classOrInterfaceDec)) {
+        final List<ClassOrInterfaceDeclaration> classDeclarations = compilationUnit
+                .findAll(ClassOrInterfaceDeclaration.class, Predicates::isClassDeclaration);
+        for (final var classDeclaration : classDeclarations) {
+            if (LombokDetector.usesLombok(compilationUnit, classDeclaration)) {
                 continue;
             }
 
-            final String fullyQualifiedName = classOrInterfaceDec.resolve().getQualifiedName();
+            final String fullyQualifiedName = classDeclaration.resolve().getQualifiedName();
 
-            final Set<String> usedNames = getUsedNames(classOrInterfaceDec);
+            final Set<String> usedNames = getUsedNames(classDeclaration);
 
-            classOrInterfaceDec
+            classDeclaration
                     .findAll(FieldDeclaration.class, (fieldDeclaration) -> fieldDeclaration
                             .getAccessSpecifier() == AccessSpecifier.PRIVATE
                             && !LombokDetector.usesLombok(compilationUnit, fieldDeclaration))
@@ -42,7 +50,7 @@ public class UnusedAttributesAnalyzer extends Analyzer {
                                 .map(VariableDeclarator::getNameAsString)
                                 .collect(Collectors.toList());
                         if (!usedNames.containsAll(variablesNames)) {
-                            addIssue(fullyQualifiedName, IssuesCodes.UNUSED_ATTRIBUTE,
+                            addIssue(fullyQualifiedName, IssueCode.UNUSED_ATTRIBUTE,
                                     new RawIssue(fieldDeclaration));
                         }
                     });

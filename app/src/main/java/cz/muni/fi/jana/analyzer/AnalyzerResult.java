@@ -3,6 +3,8 @@ package cz.muni.fi.jana.analyzer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import org.json.JSONObject;
 import cz.muni.fi.jana.analyzer.issues.Issue;
 
@@ -30,6 +32,10 @@ public class AnalyzerResult {
 
     public void add(AnalyzerResult result) {
         this.issues.addAll(result.getIssues());
+    }
+
+    public void filterIssues(Predicate<Issue> predicate) {
+        issues = issues.stream().filter(predicate).collect(Collectors.toList());
     }
 
     private List<Issue> issues = new ArrayList<>();

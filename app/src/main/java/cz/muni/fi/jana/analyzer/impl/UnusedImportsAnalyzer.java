@@ -13,10 +13,18 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import cz.muni.fi.jana.analyzer.Analyzer;
-import cz.muni.fi.jana.analyzer.issues.IssuesCodes;
+import cz.muni.fi.jana.analyzer.issues.IssueCode;
 import cz.muni.fi.jana.analyzer.issues.RawIssue;
 
 public class UnusedImportsAnalyzer extends Analyzer {
+
+    public UnusedImportsAnalyzer() {
+        super();
+    }
+
+    public UnusedImportsAnalyzer(boolean includeContext) {
+        super(includeContext);
+    }
 
     @Override
     public void analyze(CompilationUnit compilationUnit) {
@@ -74,7 +82,7 @@ public class UnusedImportsAnalyzer extends Analyzer {
             if (usedTypes.contains(identifier)) {
                 continue;
             }
-            addIssue(fullyQualifiedName, IssuesCodes.UNUSED_IMPORT, new RawIssue(importDec));
+            addIssue(fullyQualifiedName, IssueCode.UNUSED_IMPORT, new RawIssue(importDec));
         }
     }
 

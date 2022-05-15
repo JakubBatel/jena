@@ -4,8 +4,12 @@ import java.util.Optional;
 import org.json.JSONObject;
 
 public class Issue {
-    public Issue(String name, Integer lineNumber, String fullyQualifiedName, String context) {
-        this.name = name;
+    public Issue(IssueCode code, Integer lineNumber, String fullyQualifiedName) {
+        this(code, lineNumber, fullyQualifiedName, null);
+    }
+
+    public Issue(IssueCode code, Integer lineNumber, String fullyQualifiedName, String context) {
+        this.code = code;
         this.lineNumber = lineNumber;
         this.fullyQualifiedName = fullyQualifiedName;
         this.context = context;
@@ -16,8 +20,12 @@ public class Issue {
         return toJSON().toString(2);
     }
 
+    public IssueCode getCode() {
+        return code;
+    }
+
     public String getName() {
-        return name;
+        return code.getLabel();
     }
 
     public Optional<Integer> getLineNumber() {
@@ -34,14 +42,16 @@ public class Issue {
 
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
-        json.put("name", name);
+        json.put("name", code.getLabel());
         json.put("class", fullyQualifiedName);
         json.put("line", lineNumber);
-        json.put("context", context);
+        if (context != null) {
+            json.put("context", context);
+        }
         return json;
     }
 
-    private final String name;
+    private final IssueCode code;
     private final Integer lineNumber;
     private final String fullyQualifiedName;
     private final String context;
